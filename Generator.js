@@ -218,13 +218,17 @@ run(g);
 
 
 // co模块，返回promise对象
+// 使用 co 的前提条件是，Generator 函数的yield命令后面，只能是 Thunk 函数或 Promise 对象。如果数组或对象的成员，全部都是 Promise 对象，也可以使用 co
 var gen = function* () {
     var f1 = yield readFile('/etc/fstab');
     var f2 = yield readFile('/etc/shells');
     console.log(f1.toString());
     console.log(f2.toString());
-  };
-  var co = require('co');
-  co(gen).then(function (){
+};
+var co = require('co');
+co(gen).then(function () {
     console.log('Generator 函数执行完成');
-  });
+});
+
+
+
