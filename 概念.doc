@@ -1,0 +1,88 @@
+1.class中的方法是不可枚举的，但是es5 prototype中的可以。
+2.constructor方法默认返回实例对象（即this），可以return另外一个对象。
+3.类必须使用new调用，否则会报错。这是它跟普通构造函数的一个主要区别，后者不用new也可以执行。
+4.类和模块的内部，默认就是严格模式，所以不需要使用use strict指定运行模式。
+5.类不存在变量提升（hoist），这一点与 ES5 完全不同。
+6.箭头函数内部的this总是指向定义时所在的对象。箭头函数位于构造函数内部，它的定义生效的时候，是在构造函数执行的时候。这时，箭头函数所在的运行环境，肯定是实例对象，所以this会总是指向实例对象。
+7.静态方法：如果在一个方法前，加上static关键字，就表示该方法不会被实例继承，而是直接通过类来调用。父类的静态方法，可以被子类继承。静态方法也是可以从super对象上调用的。
+    class Bar extends Foo {
+        static classMethod() {
+            return super.classMethod() + ', too';
+        }
+    }
+8.子类必须在constructor方法中调用super方法，否则新建实例时会报错。
+这是因为子类自己的this对象，必须先通过父类的构造函数完成塑造，得到与父类同样的实例属性和方法，然后再对其进行加工，加上子类自己的实例属性和方法。如果不调用super方法，子类就得不到this对象。
+A.prototype.constructor.call(this)。
+9.ES5 的继承，实质是先创造子类的实例对象this，然后再将父类的方法添加到this上面（Parent.apply(this)）。
+ES6 的继承机制完全不同，实质是先将父类实例对象的属性和方法，加到this上面（所以必须先调用super方法），然后再用子类的构造函数修改this。
+10.Object.getPrototypeOf方法可以用来从子类上获取父类。
+11.super作为对象时，在普通方法中，指向父类的原型对象；在静态方法中，指向父类。
+由于super指向父类的原型对象，所以定义在父类实例（定义在construct内部的）上的方法或属性，是无法通过super调用的。
+12.由于this指向子类实例，所以如果通过super对某个属性赋值，这时super就是this，赋值的属性会变成子类实例的属性。
+    constructor() {
+        super();
+        this.x = 2;
+        super.x = 3;
+        console.log(super.x); // undefined
+        console.log(this.x); // 3
+    }
+13.使用super的时候，必须显式指定是作为函数、还是作为对象使用，否则会报错。
+    console.log(super) // 会报错                  super.a()
+14.两条继承链
+（1）子类的__proto__属性，表示构造函数的继承，总是指向父类。
+（2）子类prototype属性的__proto__属性，表示方法的继承，总是指向父类的prototype属性。
+15.类可以继承原生构造函数（Array，Object，Error等）
+    class MyArray extends Array {
+        constructor(...args) {
+            super(...args);
+        }
+    }
+    原生构造函数会忽略apply方法传入的this，也就是说，原生构造函数的this无法绑定，导致拿不到内部属性。导致es5不能继承原生构造函数。
+16.export命令可以出现在模块的任何位置，只要处于模块顶层就可以。如果处于块级作用域内，就会报错，import命令也是如此。
+17.import命令输入的变量都是只读的，因为它的本质是输入接口。也就是说，不允许在加载模块的脚本里面，改写接口。但是可以改写变量的属性
+18.因为import在静态解析阶段执行，所以它是一个模块之中最早执行的。
+19.export default不需要{}，export需要。
+    export var a = 1; // 正确
+    export default var a = 1; // 错误
+    // 正确
+    var a = 1;
+    export default a;
+    export a; // 错误
+20.js的两种异步加载：
+defer与async的区别是：defer要等到整个页面在内存中正常渲染结束（DOM 结构完全生成，以及其他脚本执行完成），才会执行；async一旦下载完，渲染引擎就会中断渲染，执行这个脚本以后，再继续渲染。
+21.es6中 <script type="module" src="./foo.js"></script> type=module,所以浏览器知道这是一个 ES6 模块。都是异步加载，不会造成堵塞浏览器，即等到整个页面渲染完，再执行模块脚本
+22.ES6 模块与 CommonJS 模块:
+    CommonJS 模块输出的是一个值的拷贝，ES6 模块输出的是值的引用。
+    CommonJS 模块是运行时加载，ES6 模块是编译时输出接口。
+23.Node 要求 ES6 模块采用.mjs后缀文件名。也就是说，只要脚本文件里面使用import或者export命令，那么就必须采用.mjs后缀名。
+require命令不能加载.mjs文件，会报错，只有import命令才可以加载.mjs文件。反过来，.mjs文件里面也不能使用require命令，必须使用import。
+安装 Node v8.5.0 或以上版本  $ node --experimental-modules my-app.mjs   打开该功能
+24.const [first, second] = arr;    const { firstName, lastName } = obj;    const itemsCopy = [...items];（使用扩展运算符拷贝数组）
+   使用 Array.from 方法，将类似数组的对象转为数组。
+25.new Set();
+(1)但是成员的值都是唯一的
+(2)add(value)：添加某个值，返回 Set 结构本身。
+    delete(value)：删除某个值，返回一个布尔值，表示删除是否成功。
+    has(value)：返回一个布尔值，表示该值是否为Set的成员。
+    clear()：清除所有成员，没有返回值。
+(3)keys()：返回键名的遍历器
+    values()：返回键值的遍历器
+    entries()：返回键值对的遍历器
+    forEach()：使用回调函数遍历每个成员
+26.const ws = new WeakSet();
+    WeakSet.prototype.add(value)：向 WeakSet 实例添加一个新成员。
+    WeakSet.prototype.delete(value)：清除 WeakSet 实例的指定成员。
+    WeakSet.prototype.has(value)：返回一个布尔值，表示某个值是否在 WeakSet 实例之中。
+27.const m = new Map();
+(1)size 属性
+    set(key, value)
+    get(key)
+    has(key)
+    delete(key)
+    clear()
+(2)keys()：返回键名的遍历器。
+    values()：返回键值的遍历器。
+    entries()：返回所有成员的遍历器。
+    forEach()：遍历 Map 的所有成员
+28.const wm1 = new WeakMap();
+    
