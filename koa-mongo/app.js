@@ -21,16 +21,22 @@ app.use(cors({
 // 连接数据库mongoDB
 var MongoClient = require('mongodb').MongoClient;
 var url = "mongodb://localhost:27017";
+// 连接数据库
 MongoClient.connect(url, { useNewUrlParser: true }, function (err, db) {
     if (err) throw err;
+    // 获取node_koa_mongoDB数据库
     var dbo = db.db("node_koa_mongoDB");
+    // 查询数据中的所有数据
     dbo.collection("site").find('*').toArray(function (err, result) {
         if (err) throw err;
+        console.log(result);
         var myobj = { name: "test2" };
         let data = result.map((il) => {
             return il.name;
         });
+        // 判断是否已经存在
         if(data.indexOf(myobj.name)===-1){
+            // 如果不存在，想数据库中插入一条数据
             dbo.collection("site").insertOne(myobj, function (err, res) {
                 if (err) throw err;
                 console.log("数据插入成功");
@@ -69,6 +75,3 @@ app.use(registerRouter);
 app.listen(3000);
 console.log('app started at port 3000...')
 
-
-// npm install nodemon --save
-// 用于热重启
